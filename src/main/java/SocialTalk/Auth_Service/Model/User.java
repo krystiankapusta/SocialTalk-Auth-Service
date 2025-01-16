@@ -1,5 +1,6 @@
 package SocialTalk.Auth_Service.Model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,7 @@ import java.util.List;
 @Getter
 @Setter
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -66,5 +68,13 @@ public class User implements UserDetails {
     public boolean isEnabled()
     {
         return enabled;
+    }
+    @Override
+    public String toString() {
+        return "User{" +
+                "userId='" + id + '\'' +
+                "username='" + username + '\'' +
+                ", email='" + email + '\'' +
+                '}';
     }
 }

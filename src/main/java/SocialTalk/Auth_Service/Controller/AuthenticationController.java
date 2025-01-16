@@ -5,6 +5,8 @@ import SocialTalk.Auth_Service.DataTransferObject.RegisterUserDTO;
 import SocialTalk.Auth_Service.Model.User;
 import SocialTalk.Auth_Service.Responses.LoginResponse;
 import SocialTalk.Auth_Service.Service.AuthenticationService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -44,7 +46,8 @@ public class AuthenticationController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginUserDTO loginUserDTO){
         User authenticatedUser = authenticationService.authenticate(loginUserDTO);
-        String jwtToken = jwtService.generateToken(authenticatedUser);
+        Long userId = authenticatedUser.getId();
+        String jwtToken = jwtService.generateToken(authenticatedUser, userId);
         LoginResponse loginResponse = new LoginResponse(jwtToken, jwtService.getExpirationTime());
         return ResponseEntity.ok(loginResponse);
     }
@@ -81,10 +84,9 @@ public class AuthenticationController {
         }
     }
     @PostMapping("/resetPassword")
-    public ResponseEntity<?> resetPassword(
-            @CookieValue(value = "resetToken", required = false) String resetToken,
-            @RequestBody Map<String, String> requestBody) {
+    public ResponseEntity<?> resetPassword(HttpServletRequest request, @RequestBody Map<String, String> requestBody) {
 
+        String resetToken = extractTokenFromCookies(request);
         if (resetToken == null || resetToken.isBlank()) {
             return ResponseEntity.badRequest().body("Reset token is missing or invalid");
         }
@@ -101,6 +103,18 @@ public class AuthenticationController {
             System.err.println("Error resetting password: " + e.getMessage());
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    private String extractTokenFromCookies(HttpServletRequest request) {
+        if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if ("resetToken".equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        System.out.println("No resetToken cookie found");
+        return null;
     }
 
 }

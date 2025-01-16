@@ -7,7 +7,6 @@ import SocialTalk.Auth_Service.DataTransferObject.RegisterUserDTO;
 import SocialTalk.Auth_Service.Repository.UserRepository;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -156,7 +155,7 @@ public class AuthenticationService {
             String resetToken = jwtService.generateResetToken(email);
 
             Cookie resetTokenCookie = new Cookie("resetToken", resetToken);
-            resetTokenCookie.setHttpOnly(true);
+            resetTokenCookie.setHttpOnly(false);
             resetTokenCookie.setSecure(false);
             resetTokenCookie.setPath("/");
             resetTokenCookie.setDomain("localhost");
@@ -209,22 +208,10 @@ public class AuthenticationService {
         userRepository.save(user);
     }
 
-    public String extractTokenFromCookies(HttpServletRequest request) {
-        if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if ("resetToken".equals(cookie.getName())) {
-                    return cookie.getValue();
-                }
-            }
-        }
-        return null;
-    }
-
     public static class EmailAlreadyRegisteredException extends RuntimeException {
         public EmailAlreadyRegisteredException(String message) {
             super(message);
         }
     }
-
 
 }
