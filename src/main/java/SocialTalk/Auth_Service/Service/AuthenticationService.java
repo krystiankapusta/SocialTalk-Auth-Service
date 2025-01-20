@@ -8,6 +8,9 @@ import SocialTalk.Auth_Service.Repository.UserRepository;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,11 +22,15 @@ import java.util.Random;
 
 @Service
 public class AuthenticationService {
+    @Value("${resetUrl}")
+    private String resetUrl;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
     private final JwtService jwtService;
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
 
     public AuthenticationService(
             UserRepository userRepository,
@@ -87,12 +94,10 @@ public class AuthenticationService {
                 user.setVerificationCode(null);
                 user.setVerificationCode(null);
                 userRepository.save(user);
-
             } else
             {
                 throw new RuntimeException("Invalid verification code");
             }
-
         } else
         {
             throw new RuntimeException("User not found");
@@ -164,7 +169,6 @@ public class AuthenticationService {
 
 
             String subject = "Password Reset Request";
-            String resetUrl = "http://localhost:5173/auth/resetPassword";
             String htmlMessage = "<html>"
                     + "<body>"
                     + "<p>Please click the link below to reset your password:</p>"
@@ -189,13 +193,13 @@ public class AuthenticationService {
         try {
             email = jwtService.extractUsername(token);
         } catch (RuntimeException e) {
-            System.out.println("Error extracting username from token: " + e.getMessage());
+            logger.error("Error extracting username from token: {}", e.getMessage());
             throw new RuntimeException("Invalid or expired reset token");
         }
 
         Optional<User> optionalUser = userRepository.findByEmail(email);
         if (optionalUser.isEmpty()) {
-            System.out.println("User not found for email: " + email);
+            logger.info("User not found for email: {}", email);
             throw new RuntimeException("User not found");
         }
 

@@ -15,10 +15,14 @@ import org.springframework.web.bind.annotation.*;
 import SocialTalk.Auth_Service.Service.JwtService;
 import SocialTalk.Auth_Service.DataTransferObject.VerifyUserDTO;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import java.util.Map;
 
 @RequestMapping("/auth")
 @RestController
+@Tag(name = "Authentication", description = "Auth Service API")
 public class AuthenticationController {
     private final JwtService jwtService;
     @Autowired
@@ -31,6 +35,10 @@ public class AuthenticationController {
     }
 
     @PostMapping("/signup")
+    @Operation(
+            summary = "Register new user",
+            description = "Creates a new user account with the provided registration details. Returns user data on success."
+    )
     public ResponseEntity<?> register(@RequestBody RegisterUserDTO registerUserDTO) {
         try{
             User registeredUser = authenticationService.signup(registerUserDTO);
@@ -44,6 +52,10 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
+    @Operation(
+            summary = "Authenticate user",
+            description = "Authenticates user credentials and returns JWT token with expiration time"
+    )
     public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginUserDTO loginUserDTO){
         User authenticatedUser = authenticationService.authenticate(loginUserDTO);
         Long userId = authenticatedUser.getId();
@@ -53,6 +65,10 @@ public class AuthenticationController {
     }
 
     @PostMapping("/verify")
+    @Operation(
+            summary = "Verify user account",
+            description = "Verifies user account using the verification code"
+    )
     public ResponseEntity<?> verifyUser(@RequestBody VerifyUserDTO verifyUserDTO) {
         try {
             authenticationService.verifyUser(verifyUserDTO);
@@ -63,6 +79,10 @@ public class AuthenticationController {
     }
 
     @PostMapping("/resend")
+    @Operation(
+            summary = "Resend verification code",
+            description = "Resends verification code to the specified email address"
+    )
     public ResponseEntity<?> resendVerificationCode(@RequestParam String email) {
         try {
             authenticationService.resendVerificationCode(email);
@@ -73,6 +93,10 @@ public class AuthenticationController {
     }
 
     @PostMapping("/resetPasswordRequest")
+    @Operation(
+            summary = "Request password reset",
+            description = "Sends a password reset link to the provided email address"
+    )
     public ResponseEntity<?> resetPasswordRequest(@RequestParam String email, HttpServletResponse response)
     {
         try{
@@ -84,6 +108,10 @@ public class AuthenticationController {
         }
     }
     @PostMapping("/resetPassword")
+    @Operation(
+            summary = "Reset password",
+            description = "Resets user password using the reset token and the new password provided"
+    )
     public ResponseEntity<?> resetPassword(HttpServletRequest request, @RequestBody Map<String, String> requestBody) {
 
         String resetToken = extractTokenFromCookies(request);

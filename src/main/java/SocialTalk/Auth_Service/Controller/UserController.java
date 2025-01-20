@@ -10,7 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
-
+import io.swagger.v3.oas.annotations.Operation;
 
 import java.util.List;
 
@@ -25,46 +25,51 @@ public class UserController {
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @GetMapping("/me")
+    @Operation(
+            summary = "Get authenticated user",
+            description = "Retrieves the currently authenticated user's information"
+    )
     public ResponseEntity<User> authenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Object principal = authentication.getPrincipal();
 
         if (principal instanceof User currentUser) {
-            logger.debug("Current user: {}", currentUser);
+            logger.info("Current user: {}", currentUser);
             return ResponseEntity.ok(currentUser);
         } else {
-            logger.warn("Principal is not of type User: {}", principal);
+            logger.info("Principal is not of type User: {}", principal);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
 
-//    @GetMapping("/findUser/{id}")
-//    public Optional<User> getUser(@PathVariable Long id) {
-//        logger.info("ID ", id);
-//        logger.info("User found: ", userService.getUser(id));
-//        return userService.getUser(id);
-//    }
-
     @GetMapping("/find/{id}")
+    @Operation(
+            summary = "Find user by ID",
+            description = "Retrieves a specific user's information based on their ID"
+    )
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
         try {
-            System.out.println("Controller: Received request for user ID: " + id);
+            logger.info("Controller: Received request for user ID: {}", id);
             Optional<User> user = userService.getUser(id);
 
             if (user.isPresent()) {
-                System.out.println("Controller: Found user: " + user.get());
+                logger.info("Controller: Found user: {}", user.get());
                 return ResponseEntity.ok(user.get());
             } else {
-                System.out.println("Controller: No user found with ID: " + id);
+                logger.info("Controller: No user found with ID: {}", id);
                 return ResponseEntity.notFound().build();
             }
         } catch (Exception e) {
-            System.out.println("Controller: Error: " + e.getMessage());
+            logger.error("Controller: Error: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @GetMapping("/all")
+    @Operation(
+            summary = "Get all users",
+            description = "Retrieves a list of all registered users in the system"
+    )
     public ResponseEntity<List<User>> allUsers() {
         List <User> users = userService.allUsers();
 
@@ -74,7 +79,6 @@ public class UserController {
 
         logger.info("All users: {}", users);
 
-        System.out.println("Users all" + users);
         return ResponseEntity.ok(users);
     }
 

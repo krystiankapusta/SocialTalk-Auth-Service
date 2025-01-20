@@ -18,7 +18,7 @@ public class UserService {
 
     public UserService(UserRepository userRepository, EmailService emailService) {
         this.userRepository = userRepository;
-        System.out.println("UserService has been created");
+        logger.info("UserService has been created");
     }
 
 
@@ -30,9 +30,9 @@ public class UserService {
 
     public Optional<User> getUser(Long id) {
         try {
-            logger.debug("Service: Looking up user with ID: {}", id);
+            logger.info("Service: Looking up user with ID: {}", id);
             Optional<User> user = userRepository.findById(id);
-            logger.debug("Service: User found: {}, Details: {}", user.isPresent(), user.orElse(null));
+            logger.info("Service: User found: {}, Details: {}", user.isPresent(), user.orElse(null));
             return user;
         } catch (Exception e) {
             logger.error("Service: Error fetching user with ID {}: {}", id, e.getMessage(), e);

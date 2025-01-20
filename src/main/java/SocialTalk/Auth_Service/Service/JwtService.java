@@ -5,6 +5,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,8 @@ public class JwtService {
     private String secretKey;
     @Value("${security.jwt.expiration-time}")
     private long jwtExpiration;
+    private static final Logger logger = LoggerFactory.getLogger(JwtService.class);
+
 
     public String extractUsername(String token)
     {
@@ -126,8 +130,8 @@ public class JwtService {
         final Claims claims = extractAllClaims(token);
         final String tokenEmail = claims.getSubject();
         final String tokenPurpose = claims.get("purpose", String.class);
-        System.out.println("Token email: " + claims.getSubject());
-        System.out.println("Token purpose: " + claims.get("purpose"));
+        logger.info("Token email: {}", claims.getSubject());
+        logger.info("Token purpose: {}", claims.get("purpose"));
         return ("password_reset".equals(tokenPurpose) && email.equals(tokenEmail) && !isTokenExpired(token));
 
     }
